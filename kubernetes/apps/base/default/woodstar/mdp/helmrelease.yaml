@@ -20,7 +20,7 @@ spec:
               - mdp
             image:
               repository: ghcr.io/woodleighschool/woodstar
-              tag: 0.10.4@sha256:7e3cd5e6a993581f5be83b31a343da0551e1fe54df4f5662eea5811a60ada748
+              tag: 0.10.5@sha256:184701f3777be1acf80f4ff88dc76a024efb110f3db8edd48e5e908a3f22f73a
             env:
               TZ: Australia/Melbourne
               WOODSTAR_MDP_DATA_DIR: /data
