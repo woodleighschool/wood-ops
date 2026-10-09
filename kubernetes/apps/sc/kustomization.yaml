@@ -10,7 +10,6 @@ resources:
   - ./default
   - ./external-secrets
   - ./flux-system
-  - ./garage-system
   - ./kopiur-system
   - ./kube-system
   - ./monitoring
