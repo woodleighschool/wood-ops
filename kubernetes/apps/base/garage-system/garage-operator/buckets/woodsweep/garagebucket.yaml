@@ -10,6 +10,9 @@ spec:
   bucketId: db6c8302c64b40ee9d5076c00d727ebeeb5027a9d54d0cc93bea2c6ac747d17d
   clusterRef:
     name: garage
+  # Deleting this leaves the bucket in Garage: the operator won't delete one that
+  # still holds objects. They go with the cluster's volumes.
+  deletionPolicy: Retain
   website:
     enabled: true
     indexDocument: index.html
