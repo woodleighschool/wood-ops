@@ -8,7 +8,7 @@
   ],
   lockFileMaintenance: {
     enabled: true,
-    schedule: ["before 3am on the first day of the month"],
+    schedule: ["before 6am on the first day of the month"],
     commitMessageExtra: "({{manager}})",
     additionalBranchPrefix: "{{manager}}-",
   },
@@ -174,7 +174,7 @@
       description: "High-cadence mise tools monthly",
       matchManagers: ["mise"],
       matchDepNames: ["node", "oxfmt"],
-      schedule: ["before 3am on the first day of the month"],
+      schedule: ["before 6am on the first day of the month"],
     },
     // Labeling rules
     {
