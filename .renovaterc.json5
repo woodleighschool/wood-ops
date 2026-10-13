@@ -12,15 +12,6 @@
     commitMessageExtra: "({{manager}})",
     additionalBranchPrefix: "{{manager}}-",
   },
-  hostRules: [
-    {
-      description: "Authenticate against the GitHub Container registry",
-      matchHost: "ghcr.io",
-      hostType: "docker",
-      username: "{{ secrets.GHCR_USERNAME }}",
-      password: "{{ secrets.GHCR_TOKEN }}",
-    },
-  ],
   packageRules: [
     // Auto-merge rules
     {
