@@ -71,7 +71,7 @@ spec:
                 access_key: ${NESSUS_ACCESS_KEY}
                 secret_key: ${NESSUS_SECRET_KEY}
               settings:
-                scan: ${NESSUS_SCAN_ID}
+                scan: 17
                 ignore:
                   severity:
                     - "info"
