@@ -21,3 +21,4 @@ resources:
   - ./woodgate.yaml
   - ./woodsweep.yaml
   - ./woodstar.yaml
+  - ./zagreus.yaml

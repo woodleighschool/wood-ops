@@ -1,0 +1,115 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: zagreus
+  annotations:
+    # The config's ${VARS} are read by the app from its environment
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: zagreus
+  interval: 1h
+  values:
+    controllers:
+      zagreus:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/woodleighschool/zagreus
+              tag: 0.1.0@sha256:504e7852d887090d7e684c35c7c70827e5860f205f72a3fc165f0d2f7e84ce1d
+            args:
+              - run
+              - --config=/etc/zagreus/config.yaml
+            env:
+              TZ: Australia/Melbourne
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    configMaps:
+      config:
+        data:
+          config.yaml: |-
+            version: 1
+            settings:
+              log_level: info
+              sync:
+              terms:
+                - name: Term 1
+                  range: 29/1/26-11/4/26
+                - name: Term 2
+                  range: 12/4/26-11/7/26
+                - name: Term 3
+                  range: 12/7/26-3/10/26
+                - name: Term 4
+                  range: 3/10/26-28/1/27
+              mode: create
+            nessus:
+              connection:
+                host: ${NESSUS_HOST}
+                access_key: ${NESSUS_ACCESS_KEY}
+                secret_key: ${NESSUS_SECRET_KEY}
+              settings:
+                scan: ${NESSUS_SCAN_ID}
+                ignore:
+                  severity:
+                    - "info"
+                    - "low"
+                    - "medium"
+                  hosts:
+                  plugins:
+                    - 45411
+                  combination:
+            trello:
+              connection:
+                api_key: ${TRELLO_API_KEY}
+                api_token: ${TRELLO_API_TOKEN}
+              settings:
+                board_prefix: Nessus
+                lists:
+                  - Icebox
+                  - Not Started
+                  - Researching
+                  - In Progress
+                  - Remediated
+                in: Not Started
+                out: Remediated
+                labels:
+                  low: green
+                  medium: yellow
+                  high: orange
+                  critical: red
+                  resolved: green_dark
+                  waiting: sky_dark
+                automations:
+                  -
+                buttons:
+                  -
+    persistence:
+      config:
+        type: configMap
+        identifier: config
+        globalMounts:
+          - path: /etc/zagreus/config.yaml
+            subPath: config.yaml
