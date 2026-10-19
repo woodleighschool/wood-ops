@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: flux-operator
 spec:
+  components:
+    - ../../../../sc/flux-system/flux-operator
   interval: 1h
   path: ./kubernetes/apps/base/flux-system/flux-operator/app
   prune: true
