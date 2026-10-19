@@ -3,7 +3,9 @@
 # Chart, version and values come from the cluster's own Flux tree, rendered by
 # `just bootstrap render <cluster>` into BOOTSTRAP_RENDER_DIR, so bootstrap
 # installs exactly what Flux will reconcile. A release the cluster does not
-# select is skipped.
+# select is skipped unless it is labelled `always: "true"`. (A release can't set
+# its own installedTemplate: helmfile 1.8 writes it back into this template, so
+# every release after it inherits it.)
 templates:
   default:
     chart: '{{ (fromYaml (tpl (readFile "./templates/release.yaml.gotmpl") .)).chart }}'

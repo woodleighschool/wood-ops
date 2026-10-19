@@ -60,7 +60,9 @@ releases:
     needs:
       - kube-system/cilium
 
-  - name: reflector
+  - # Copies the CA bundle out of kube-system. The admission policy mounts it
+    # into every pod, so nothing outside kube-system starts without it.
+    name: reflector
     namespace: kube-system
     needs:
       - kube-system/coredns
@@ -71,7 +73,9 @@ releases:
     needs:
       - kube-system/coredns
 
-  - name: cert-manager
+  - # Optional: clusters that import SC's certificates don't run it, so nothing
+    # needs it
+    name: cert-manager
     namespace: cert-manager
     needs:
       - kube-system/reflector

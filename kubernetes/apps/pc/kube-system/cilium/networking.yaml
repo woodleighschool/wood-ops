@@ -54,6 +54,7 @@ spec:
       kubernetes.io/os: linux
   bgpInstances:
     - name: cilium
+      # ASNs are 645<site><role>: site 1 sc, 2 pc, 3 mc; role 3 the CX, 4 the cluster
       localASN: 64524
       peers:
         - name: aruba-cx

@@ -9,7 +9,8 @@
 # Installing CRDs out-of-band ensures they exist before Flux begins reconciling
 # workloads that reference them, avoiding the need for dependsOn chains on nearly
 # every Kustomization that consumes a CRD-backed resource. Releases the cluster
-# does not select are skipped.
+# does not select are skipped, except grafana-operator and kube-prometheus-stack
+# (labelled `always`): every cluster's apps create dashboards, monitors and rules.
 
 helmDefaults:
   args:

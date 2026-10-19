@@ -3,6 +3,7 @@
 {{- if isFile $file -}}
 {{ readFile $file }}
 {{- else if isFile $base -}}
+{{- /* Not selected but installed anyway (CRDs only): the app's base chart */ -}}
 {{- with readFile $base | fromYaml }}
 chart: {{ .spec.url }}
 version: {{ .spec.ref.tag }}

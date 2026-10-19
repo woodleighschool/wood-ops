@@ -20,10 +20,10 @@ kind: VolumeConfig
 name: EPHEMERAL
 provisioning:
   diskSelector:
-    match: disk.wwid == "t10.NUTANIX NFS_3_0_1698_53b2fe58_f1e8_452b_8b31_394aaa6991e5"
+    match: disk.wwid == "t10.NUTANIX NFS_3_0_1698_53b2fe58_f1e8_452b_8b31_394aaa6991e5" # 200 GiB vdisk
 ---
 apiVersion: v1alpha1
 kind: UnattendedInstallConfig
 provisioning:
   diskSelector:
-    match: disk.wwid == "t10.NUTANIX NFS_3_0_1697_b97b89bc_1def_4707_bd57_5712c9985880"
+    match: disk.wwid == "t10.NUTANIX NFS_3_0_1697_b97b89bc_1def_4707_bd57_5712c9985880" # 64 GiB vdisk
