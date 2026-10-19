@@ -36,7 +36,7 @@ render cluster:
 [private]
 nodes cluster:
     just log info "Running stage..." "stage" "{{ recipe_name() }}" "cluster" "{{ cluster }}"
-    for n in $(talosctl --context "{{ cluster }}" config info -o yaml | yq -r -e '.nodes | join(" ")'); do
+    for n in $(just talos nodes "{{ cluster }}"); do
         if ! op=$(just --yes talos apply-node "{{ cluster }}" "$n" --insecure 2>&1); then
             if [[ "$op" == *"certificate required"* ]]; then
                 just log info "Talos already configured, skipping apply of config" "stage" "{{ recipe_name() }}" "node" "$n"
@@ -50,7 +50,7 @@ nodes cluster:
 k8s cluster:
     just log info "Running stage..." "stage" "{{ recipe_name() }}" "cluster" "{{ cluster }}"
     controller="$(just bootstrap controller "{{ cluster }}")"
-    until op=$(talosctl --context "{{ cluster }}" -n "${controller}" bootstrap 2>&1 || true) && [[ "$op" == *"AlreadyExists"* ]]; do
+    until op=$(talosctl --context "{{ cluster }}" -e "${controller}" -n "${controller}" bootstrap 2>&1 || true) && [[ "$op" == *"AlreadyExists"* ]]; do
         just log info "Kubernetes bootstrap in progress. Retrying in 5 seconds..." "stage" "{{ recipe_name() }}"
         sleep 5
     done
@@ -61,7 +61,7 @@ k8s cluster:
 kubeconfig cluster lb="cilium":
     just log info "Running stage..." "stage" "{{ recipe_name() }}" "cluster" "{{ cluster }}"
     controller="$(just bootstrap controller "{{ cluster }}")"
-    if ! talosctl --context "{{ cluster }}" kubeconfig -n "${controller}" -f --force-context-name "{{ cluster }}" "{{ justfile_dir() }}"; then
+    if ! talosctl --context "{{ cluster }}" -e "${controller}" kubeconfig -n "${controller}" -f --force-context-name "{{ cluster }}" "{{ justfile_dir() }}"; then
         just log fatal "Failed to fetch kubeconfig" "stage" "{{ recipe_name() }}"
     fi
     if [[ "{{ lb }}" != "cilium" ]]; then
@@ -105,8 +105,9 @@ apps cluster:
 [private]
 api-ready cluster:
     just log info "Running stage..." "stage" "{{ recipe_name() }}" "cluster" "{{ cluster }}"
-    for n in $(talosctl --context "{{ cluster }}" config info -o yaml | yq -r -e '.nodes | join(" ")'); do
-        until [[ "$(curl -ks -o /dev/null -w '%{http_code}' --connect-timeout 2 "https://${n}:6443/readyz")" == "200" ]]; do
+    for n in $(just talos nodes "{{ cluster }}"); do
+        addr="$(just talos address "{{ cluster }}" "$n")"
+        until [[ "$(curl -ks -o /dev/null -w '%{http_code}' --connect-timeout 2 "https://${addr}:6443/readyz")" == "200" ]]; do
             just log info "Waiting for kube-apiserver. Retrying in 5 seconds..." "stage" "{{ recipe_name() }}" "node" "$n"
             sleep 5
         done
@@ -125,4 +126,4 @@ nodes-ready cluster:
 
 [private]
 controller cluster:
-    talosctl --context "{{ cluster }}" config info -o yaml | yq -r -e '.endpoints[0]'
+    just talos address "{{ cluster }}" "$(just talos nodes "{{ cluster }}" | sed -n 1p)"

@@ -8,6 +8,6 @@ templates:
   default:
     chart: '{{ (fromYaml (tpl (readFile "./templates/release.yaml.gotmpl") .)).chart }}'
     version: '{{ (fromYaml (tpl (readFile "./templates/release.yaml.gotmpl") .)).version }}'
-    installedTemplate: '{{ isFile (printf "%s/%s/%s/release.yaml" (requiredEnv "BOOTSTRAP_RENDER_DIR") .Release.Namespace .Release.Name) }}'
+    installedTemplate: '{{ or (isFile (printf "%s/%s/%s/release.yaml" (requiredEnv "BOOTSTRAP_RENDER_DIR") .Release.Namespace .Release.Name)) (eq (index .Release.Labels "always") "true") }}'
     values:
       - ./templates/values.yaml.gotmpl

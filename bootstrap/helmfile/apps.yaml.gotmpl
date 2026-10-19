@@ -60,6 +60,11 @@ releases:
     needs:
       - kube-system/cilium
 
+  - name: reflector
+    namespace: kube-system
+    needs:
+      - kube-system/coredns
+
   - # Optional: not every cluster runs spegel, so nothing needs it
     name: spegel
     namespace: kube-system
@@ -69,12 +74,12 @@ releases:
   - name: cert-manager
     namespace: cert-manager
     needs:
-      - kube-system/coredns
+      - kube-system/reflector
 
   - name: external-secrets
     namespace: external-secrets
     needs:
-      - cert-manager/cert-manager
+      - kube-system/reflector
 
   - name: onepassword-connect
     namespace: external-secrets

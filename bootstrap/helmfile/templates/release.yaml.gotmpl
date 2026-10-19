@@ -1,6 +1,12 @@
 {{- $file := printf "%s/%s/%s/release.yaml" (requiredEnv "BOOTSTRAP_RENDER_DIR") .Release.Namespace .Release.Name -}}
+{{- $base := printf "../../kubernetes/apps/base/%s/%s/app/ocirepository.yaml" .Release.Namespace .Release.Name -}}
 {{- if isFile $file -}}
 {{ readFile $file }}
+{{- else if isFile $base -}}
+{{- with readFile $base | fromYaml }}
+chart: {{ .spec.url }}
+version: {{ .spec.ref.tag }}
+{{- end -}}
 {{- else -}}
 chart: unselected/{{ .Release.Name }}
 version: ""
