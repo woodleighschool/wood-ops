@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - patch: |-
+      apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      metadata:
+        name: _
+      spec:
+        refreshInterval: 1h
+        refreshPolicy: Periodic
+    target:
+      kind: ExternalSecret
