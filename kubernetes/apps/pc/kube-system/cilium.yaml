@@ -7,7 +7,6 @@ metadata:
 spec:
   components:
     - ../../../../pc/kube-system/cilium
-    - ../../../../../components/single-node/cilium
   interval: 1h
   path: ./kubernetes/apps/base/kube-system/cilium/app
   prune: true
