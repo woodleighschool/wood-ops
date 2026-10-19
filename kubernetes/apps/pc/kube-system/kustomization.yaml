@@ -7,5 +7,6 @@ resources:
   - ../../../components/alerts/github-status
   - ./cilium.yaml
   - ./coredns.yaml
+  - ./metrics-server.yaml
   - ./namespace.yaml
   - ./reflector.yaml
