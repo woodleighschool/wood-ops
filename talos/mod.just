@@ -7,7 +7,8 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 [confirm('Apply Talos config to ' + node + ' in ' + cluster + ' [y|N] ?')]
 [doc('Apply Talos config to a node')]
 apply-node cluster node *args:
-    just talos render-config "{{ cluster }}" "{{ node }}" | talosctl --context "{{ cluster }}" -n "{{ node }}" apply-config -f /dev/stdin {{ args }}
+    addr="$(just talos address "{{ cluster }}" "{{ node }}")"
+    just talos render-config "{{ cluster }}" "{{ node }}" | talosctl --context "{{ cluster }}" -e "${addr}" -n "${addr}" apply-config -f /dev/stdin {{ args }}
 
 [doc('Download Talos machine image')]
 download-image cluster version node="":
@@ -20,7 +21,8 @@ download-image cluster version node="":
 [confirm('Reboot node ' + node + ' in ' + cluster + ' [y|N] ?')]
 [doc('Reboot a node')]
 reboot-node cluster node:
-    talosctl --context "{{ cluster }}" -n {{ node }} reboot -m powercycle
+    addr="$(just talos address "{{ cluster }}" "{{ node }}")"
+    talosctl --context "{{ cluster }}" -e "${addr}" -n "${addr}" reboot -m powercycle
 
 # Shared machine config, then the cluster's, the role's, the cluster's role
 # additions and the node's, each patched over the last.
@@ -42,22 +44,38 @@ render-config cluster node:
 [confirm('Reset node ' + node + ' in ' + cluster + ' [y|N] ?')]
 [doc('Reset a node')]
 reset-node cluster node *args:
-    talosctl --context "{{ cluster }}" -n "{{ node }}" reset --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --system-labels-to-wipe u-local-hostpath --graceful=false {{ args }}
+    addr="$(just talos address "{{ cluster }}" "{{ node }}")"
+    talosctl --context "{{ cluster }}" -e "${addr}" -n "${addr}" reset --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --system-labels-to-wipe u-local-hostpath --graceful=false {{ args }}
 
 [confirm('Shutdown node ' + node + ' in ' + cluster + ' [y|N] ?')]
 [doc('Shutdown a node')]
 shutdown-node cluster node *args:
-    talosctl --context "{{ cluster }}" -n "{{ node }}" shutdown {{ args }}
+    addr="$(just talos address "{{ cluster }}" "{{ node }}")"
+    talosctl --context "{{ cluster }}" -e "${addr}" -n "${addr}" shutdown {{ args }}
 
 [confirm('Upgrade Kubernetes on ' + cluster + ' to ' + version + ' [y|N] ?')]
 [doc('Upgrade Kubernetes version on a cluster')]
 upgrade-k8s cluster version:
-    talosctl --context "{{ cluster }}" -n "$(talosctl --context "{{ cluster }}" config info -o yaml | yq -r -e '.endpoints[0]')" upgrade-k8s --to {{ version }}
+    addr="$(just talos address "{{ cluster }}" "$(just talos nodes "{{ cluster }}" | sed -n 1p)")"
+    talosctl --context "{{ cluster }}" -e "${addr}" -n "${addr}" upgrade-k8s --to {{ version }}
 
 [confirm('Upgrade node ' + node + ' in ' + cluster + ' [y|N] ?')]
 [doc('Upgrade Talos version on a node')]
 upgrade-node cluster node *args:
-    talosctl --context "{{ cluster }}" -n "{{ node }}" upgrade -i "$(just talos machine-image "{{ cluster }}" "{{ node }}")" -m powercycle --timeout=10m {{ args }}
+    addr="$(just talos address "{{ cluster }}" "{{ node }}")"
+    talosctl --context "{{ cluster }}" -e "${addr}" -n "${addr}" upgrade -i "$(just talos machine-image "{{ cluster }}" "{{ node }}")" -m powercycle --timeout=10m {{ args }}
+
+[private]
+address cluster node:
+    yq -r -e 'select(.addresses) | .addresses[0].address | sub("/.*", "")' "{{ source_directory() }}/{{ cluster }}"/nodes/*/"{{ node }}".yaml.j2
+
+[private]
+nodes cluster:
+    for f in "{{ source_directory() }}/{{ cluster }}"/nodes/{controlplane,workers}/*.yaml.j2; do
+        if [[ -f "$f" && "$f" != *.schematic.yaml.j2 ]]; then
+            basename "$f" .yaml.j2
+        fi
+    done
 
 # Most specific wins: node, then cluster, then the shared default.
 [private]

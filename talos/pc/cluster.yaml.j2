@@ -1,0 +1,44 @@
+---
+machine:
+  ca:
+    crt: op://KubernetesPC/talos/MACHINE_CA_CRT
+  token: op://KubernetesPC/talos/MACHINE_TOKEN
+cluster:
+  ca:
+    crt: op://KubernetesPC/talos/CLUSTER_CA_CRT
+  clusterName: pc
+  controlPlane:
+    endpoint: https://10.20.69.5:6443
+  token: op://KubernetesPC/talos/CLUSTER_TOKEN
+---
+apiVersion: v1alpha1
+kind: DiscoveryIdentityConfig
+clusterID: op://KubernetesPC/talos/CLUSTER_ID
+clusterSecret: op://KubernetesPC/talos/CLUSTER_SECRET
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+name: net0
+routes:
+  - gateway: 10.20.69.1
+---
+apiVersion: v1alpha1
+kind: ResolverConfig
+nameservers:
+  - address: 10.1.110.29
+  - address: 10.1.110.30
+---
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+nodeIP:
+  validSubnets:
+    - 10.20.69.0/24
+labels:
+  topology.kubernetes.io/region: pc
+---
+apiVersion: v1alpha1
+kind: TrustedRootsConfig
+name: trust-woodleigh-vic-edu-au-ca
+certificates: |-
+op://Kubernetes/ca-bundle/TRUST_CA_CERT
+# ^ !! Indentation handled in 1Password field !!

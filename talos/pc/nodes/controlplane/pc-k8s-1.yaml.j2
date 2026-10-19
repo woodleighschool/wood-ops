@@ -1,0 +1,29 @@
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+hostname: pc-k8s-1
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+name: net0
+addresses:
+  - address: 10.20.69.5/24
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: net0
+selector:
+  match: link.driver == "virtio_net" && mac(link.permanent_addr) == "50:6b:8d:ff:e2:c1"
+---
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+provisioning:
+  diskSelector:
+    match: disk.wwid == "t10.NUTANIX NFS_3_0_1698_53b2fe58_f1e8_452b_8b31_394aaa6991e5"
+---
+apiVersion: v1alpha1
+kind: UnattendedInstallConfig
+provisioning:
+  diskSelector:
+    match: disk.wwid == "t10.NUTANIX NFS_3_0_1697_b97b89bc_1def_4707_bd57_5712c9985880"

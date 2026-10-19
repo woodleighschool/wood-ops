@@ -1,0 +1,35 @@
+---
+machine:
+  # ca merges as a unit; crt must be repeated alongside key
+  ca:
+    crt: op://KubernetesPC/talos/MACHINE_CA_CRT
+    key: op://KubernetesPC/talos/MACHINE_CA_KEY
+cluster:
+  # ca merges as a unit; crt must be repeated alongside key
+  ca:
+    crt: op://KubernetesPC/talos/CLUSTER_CA_CRT
+    key: op://KubernetesPC/talos/CLUSTER_CA_KEY
+  aggregatorCA:
+    crt: op://KubernetesPC/talos/CLUSTER_AGGREGATORCA_CRT
+    key: op://KubernetesPC/talos/CLUSTER_AGGREGATORCA_KEY
+  etcd:
+    advertisedSubnets:
+      - 10.20.69.0/24
+    ca:
+      crt: op://KubernetesPC/talos/CLUSTER_ETCD_CA_CRT
+      key: op://KubernetesPC/talos/CLUSTER_ETCD_CA_KEY
+  serviceAccount:
+    key: op://KubernetesPC/talos/CLUSTER_SERVICEACCOUNT_KEY
+---
+apiVersion: v1alpha1
+kind: KubeEtcdEncryptionConfig
+config:
+  resources:
+    - providers:
+        - secretbox:
+            keys:
+              - name: key1
+                secret: op://KubernetesPC/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
+        - identity: {}
+      resources:
+        - secrets
