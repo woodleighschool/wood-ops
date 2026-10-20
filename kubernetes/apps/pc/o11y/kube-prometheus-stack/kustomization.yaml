@@ -16,7 +16,7 @@ patches:
               annotations:
                 lbipam.cilium.io/ips: 10.20.69.90
               loadBalancerSourceRanges:
-                - 10.10.69.0/24
+                - 10.10.69.0/24 # sc
             prometheusSpec:
               additionalAlertManagerConfigs:
                 - scheme: https

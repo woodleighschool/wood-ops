@@ -39,6 +39,8 @@ spec:
         - 10.30.69.90:9090
       labels:
         cluster: mc
+  # SC's own Prometheus job, so the chart's Prometheus alerts (TargetDown,
+  # PrometheusErrorSendingAlertsToAnyAlertmanager, ...) also cover pc and mc
   relabelings:
     - action: replace
       targetLabel: job
