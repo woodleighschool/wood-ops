@@ -25,6 +25,8 @@ defaultInherit: default
 releases:
   - name: envoy-gateway
     namespace: network
+    labels:
+      always: "true"
 
   - name: grafana-operator
     namespace: o11y

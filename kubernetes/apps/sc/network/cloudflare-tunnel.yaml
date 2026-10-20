@@ -7,6 +7,8 @@ metadata:
 spec:
   components:
     - ../../../../sc/network/cloudflare-tunnel
+  dependsOn:
+    - name: cloudflare-dns
   interval: 1h
   path: ./kubernetes/apps/base/network/cloudflare-tunnel/app
   postBuild:

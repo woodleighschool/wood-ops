@@ -6,4 +6,6 @@ namespace: network
 resources:
   - ../../../components/alerts/github-status
   - ./certificates.yaml
+  - ./cloudflare-dns.yaml
+  - ./cloudflare-tunnel.yaml
   - ./namespace.yaml
