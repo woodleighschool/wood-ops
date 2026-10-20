@@ -11,3 +11,4 @@ resources:
   - ./metrics-server.yaml
   - ./namespace.yaml
   - ./reflector.yaml
+  - ./reloader.yaml
