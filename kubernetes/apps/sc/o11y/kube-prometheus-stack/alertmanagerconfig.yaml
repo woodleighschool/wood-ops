@@ -54,7 +54,7 @@ spec:
           headers:
             - key: Subject
               value: >-
-                {{ if eq .Status "resolved" }}[Resolved]{{ else }}[Firing:{{ .Alerts.Firing | len }}]{{ end }} {{ .CommonLabels.alertname }}{{ with .CommonLabels.cluster }} ({{ . }}){{ end }}
+                {{ with .CommonLabels.cluster }}[{{ . }}]{{ end }}{{ if eq .Status "resolved" }}[Resolved]{{ else }}[Firing:{{ .Alerts.Firing | len }}]{{ end }} {{ .CommonLabels.alertname }}
           text: |-
             {{ .CommonLabels.alertname }} is {{ .Status }}.
             {{- if eq .Status "firing" }}
