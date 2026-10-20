@@ -7,11 +7,6 @@ metadata:
 spec:
   interval: 1h
   path: ./kubernetes/apps/base/monitoring/prtgmpprobe/app
-  postBuild:
-    substituteFrom:
-      - kind: Secret
-        name: prtgmpprobe-secret
-        optional: false
   prune: true
   sourceRef:
     kind: GitRepository
