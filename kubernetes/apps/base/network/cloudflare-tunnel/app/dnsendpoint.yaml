@@ -5,11 +5,10 @@ kind: DNSEndpoint
 metadata:
   name: cloudflare-tunnel
   labels:
-    # Public only: internal clients reach external.woodleigh.vic.edu.au on the gateway's own address
     dns.woodleighschool.net/scope: public
 spec:
   endpoints:
-    - dnsName: external.woodleigh.vic.edu.au
+    - dnsName: flux-webhook-${CLUSTER}.woodleigh.vic.edu.au
       recordType: CNAME
       targets:
         - ${CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com

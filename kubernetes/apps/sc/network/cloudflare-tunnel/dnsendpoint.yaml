@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/externaldns.k8s.io/dnsendpoint_v1alpha1.json
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: envoy-external
+  labels:
+    # Public only: internal clients reach external.woodleigh.vic.edu.au on the gateway's own address
+    dns.woodleighschool.net/scope: public
+spec:
+  endpoints:
+    - dnsName: external.woodleigh.vic.edu.au
+      recordType: CNAME
+      targets:
+        - ${CLOUDFLARE_TUNNEL_ID}.cfargotunnel.com

@@ -74,6 +74,8 @@ spec:
         data:
           config.yaml: |-
             ingress:
+              - hostname: flux-webhook-${CLUSTER}.woodleigh.vic.edu.au
+                service: http://webhook-receiver.flux-system.svc.cluster.local
               - hostname: "*.woodleigh.vic.edu.au"
                 originRequest:
                   http2Origin: true

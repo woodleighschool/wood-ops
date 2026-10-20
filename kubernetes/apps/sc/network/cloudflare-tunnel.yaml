@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: cloudflare-tunnel
 spec:
+  components:
+    - ../../../../sc/network/cloudflare-tunnel
   interval: 1h
   path: ./kubernetes/apps/base/network/cloudflare-tunnel/app
   postBuild:

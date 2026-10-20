@@ -5,8 +5,6 @@ kind: Kustomization
 metadata:
   name: flux-instance
 spec:
-  components:
-    - ../../../../pc/flux-system/flux-instance
   dependsOn:
     - name: flux-operator
   interval: 1h
