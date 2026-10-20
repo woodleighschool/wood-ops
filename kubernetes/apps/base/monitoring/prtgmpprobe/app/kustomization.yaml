@@ -6,4 +6,9 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./ocirepository.yaml
-  - ./resources/sunca.yaml
+configMapGenerator:
+  - name: sunca
+    files:
+      - ./sunca.pem
+generatorOptions:
+  disableNameSuffixHash: true

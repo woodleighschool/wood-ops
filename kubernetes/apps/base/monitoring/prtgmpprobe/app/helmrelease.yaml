@@ -17,16 +17,19 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/PaesslerAG/docker-multi-platform-probe
-              tag: v3.11.0@sha256:ec575061909ccbd2281b8f624a0f1cdbbbc095442eda76739f3f960655b5af09
+              repository: ghcr.io/hydazz/prtgmpprobe
+              tag: 3.11.0@sha256:e146bc512ea2be2fd91043252c98ca3188541455eaa820e5c0137496eef8bf27
             env:
               TZ: Australia/Melbourne
-              PRTGMPPROBE__ID: "${PROBE_ID}"
-              PRTGMPPROBE__NAME: "${PROBE_NAME}"
+              PRTGMPPROBE__NATS__SERVER_CA: /etc/paessler/mpprobe/certs/sunca.pem
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { add: ["NET_ADMIN", "NET_RAW"] }
+              # Ping sensors open raw sockets, which need root with these capabilities.
+              capabilities: { drop: ["ALL"], add: ["NET_ADMIN", "NET_RAW"] }
             resources:
               requests:
                 cpu: 10m
@@ -34,33 +37,15 @@ spec:
               limits:
                 memory: 512Mi
     defaultPodOptions:
+      hostUsers: false
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
-    configMaps:
-      config:
-        data:
-          config.yaml: |-
-            access_key: ${ACCESS_KEY}
-            nats:
-              url: tls://${PRTG_HOST}
-              authentication:
-                user: ${NATS_USER}
-                password: ${NATS_PASSWORD}
-              server_ca: /config/sunca_root.crt
+        runAsUser: 0
+        runAsGroup: 0
     persistence:
-      config:
-        type: configMap
-        identifier: config
-        globalMounts:
-          - path: /opt/prtg/config.yaml
-            subPath: config.yaml
       sunca:
         type: configMap
-        identifier: sunca
+        name: sunca
         globalMounts:
-          - path: /opt/prtg/sunca.crt
-            subPath: sunca.crt
+          - path: /etc/paessler/mpprobe/certs
+      tmp:
+        type: emptyDir
