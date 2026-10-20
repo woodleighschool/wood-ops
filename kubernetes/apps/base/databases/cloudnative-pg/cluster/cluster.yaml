@@ -36,9 +36,9 @@ spec:
   enableSuperuserAccess: true
   superuserSecret:
     name: cloudnative-pg-secret
-  #bootstrap:
-  #  recovery:
-  #    source: source
+  bootstrap:
+    recovery:
+      source: source
   externalClusters:
     - name: source
       plugin:
