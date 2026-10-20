@@ -43,14 +43,13 @@ spec:
       - --rfc2136-kerberos-password=$(AD_DOMAIN_PASSWORD)
       - --rfc2136-kerberos-realm=WOODLEIGHSCHOOL.NET
       - --rfc2136-axfr
-    logLevel: debug
     triggerLoopOnEvent: true
     policy: sync
     sources:
       - gateway-httproute
       - service
-    txtOwnerId: main
-    txtPrefix: k8s.main.
+    txtOwnerId: ${CLUSTER}
+    txtPrefix: k8s.
     domainFilters:
       - woodleighschool.net
       - woodleigh.vic.edu.au
