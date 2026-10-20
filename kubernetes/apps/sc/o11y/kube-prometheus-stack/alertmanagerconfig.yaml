@@ -12,8 +12,8 @@ spec:
       - receiver: blackhole
         matchers:
           - name: alertname
-            value: InfoInhibitor
-            matchType: =
+            value: InfoInhibitor|Watchdog
+            matchType: =~
       - receiver: email
         matchers:
           - name: severity
@@ -54,7 +54,7 @@ spec:
           headers:
             - key: Subject
               value: >-
-                {{ if eq .Status "resolved" }}[Resolved]{{ else }}[Firing:{{ .Alerts.Firing | len }}]{{ end }} {{ .CommonLabels.alertname }}
+                {{ if eq .Status "resolved" }}[Resolved]{{ else }}[Firing:{{ .Alerts.Firing | len }}]{{ end }} {{ .CommonLabels.alertname }}{{ with .CommonLabels.cluster }} ({{ . }}){{ end }}
           text: |-
             {{ .CommonLabels.alertname }} is {{ .Status }}.
             {{- if eq .Status "firing" }}
