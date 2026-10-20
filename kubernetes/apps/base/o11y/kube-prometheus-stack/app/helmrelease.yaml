@@ -16,25 +16,7 @@ spec:
   values:
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
-      route:
-        main:
-          enabled: true
-          hostnames:
-            - alertmanager.woodleighschool.net
-          parentRefs:
-            - name: envoy-secure
-              namespace: network
-      alertmanagerSpec:
-        alertmanagerConfiguration:
-          name: alertmanager
-        externalUrl: https://alertmanager.woodleighschool.net
-        storage:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: ${STORAGECLASS}
-              resources:
-                requests:
-                  storage: 1Gi
+      enabled: false
     kubeEtcd:
       service:
         selector:
@@ -42,18 +24,9 @@ spec:
     kubeProxy:
       enabled: false
     prometheus:
-      route:
-        main:
-          enabled: true
-          hostnames:
-            - prometheus.woodleighschool.net
-          parentRefs:
-            - name: envoy-secure
-              namespace: network
       prometheusSpec:
         externalLabels:
           cluster: ${CLUSTER}
-        externalUrl: https://prometheus.woodleighschool.net
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
@@ -99,12 +72,6 @@ spec:
       fullnameOverride: kube-state-metrics
     grafana:
       enabled: false
-      forceDeployDashboards: true
-      operator:
-        dashboardsConfigMapRefEnabled: true
-        folder: o11y
-        matchLabels:
-          dashboards: grafana
     additionalPrometheusRulesMap:
       dockerhub-rules:
         groups:

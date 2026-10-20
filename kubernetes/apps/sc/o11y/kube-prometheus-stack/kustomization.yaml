@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./alertmanagerconfig.yaml
+  - ./grafanadashboard.yaml
+  - ./scrapeconfig.yaml
+patches:
+  - patch: |-
+      apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      metadata:
+        name: kube-prometheus-stack
+      spec:
+        values:
+          alertmanager:
+            enabled: true
+            route:
+              main:
+                enabled: true
+                hostnames:
+                  - alertmanager.woodleighschool.net
+                parentRefs:
+                  - name: envoy-secure
+                    namespace: network
+            alertmanagerSpec:
+              alertmanagerConfiguration:
+                name: alertmanager
+              externalUrl: https://alertmanager.woodleighschool.net
+              storage:
+                volumeClaimTemplate:
+                  spec:
+                    storageClassName: ${STORAGECLASS}
+                    resources:
+                      requests:
+                        storage: 1Gi
+          prometheus:
+            route:
+              main:
+                enabled: true
+                hostnames:
+                  - prometheus.woodleighschool.net
+                parentRefs:
+                  - name: envoy-secure
+                    namespace: network
+            prometheusSpec:
+              externalUrl: https://prometheus.woodleighschool.net
+          grafana:
+            forceDeployDashboards: true
+            operator:
+              dashboardsConfigMapRefEnabled: true
+              folder: o11y
+              matchLabels:
+                dashboards: grafana

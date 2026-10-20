@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: kube-prometheus-stack
 spec:
+  components:
+    - ../../../../sc/o11y/kube-prometheus-stack
   interval: 1h
   path: ./kubernetes/apps/base/o11y/kube-prometheus-stack/app
   prune: true
