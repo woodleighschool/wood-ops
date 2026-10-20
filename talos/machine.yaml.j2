@@ -7,26 +7,6 @@ machine:
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
     rbac: true
-  kubelet:
-    defaultRuntimeSeccompProfileEnabled: true
-    disableManifestsDirectory: true
-    extraConfig:
-      crashLoopBackOff:
-        maxContainerRestartPeriod: 60s
-      maxParallelImagePulls: 3
-      serializeImagePulls: false
-      shutdownGracePeriod: 90s
-      shutdownGracePeriodCriticalPods: 60s
-    image: ghcr.io/siderolabs/kubelet:v1.37.1
-    # KubeletConfig has no extraMounts field; OpenEBS still uses this host path.
-    extraMounts:
-      - destination: /var/openebs/local
-        type: bind
-        source: /var/openebs/local
-        options:
-          - bind
-          - rshared
-          - rw
 cluster: {}
 ---
 apiVersion: v1alpha1
@@ -91,6 +71,18 @@ content: |
     discard_unpacked_layers = false
   [plugins."io.containerd.cri.v1.runtime"]
     device_ownership_from_security_context = true
+---
+apiVersion: v1alpha1
+kind: KubeletConfig
+config:
+  crashLoopBackOff:
+    maxContainerRestartPeriod: 60s
+  maxParallelImagePulls: 3
+  serializeImagePulls: false
+  shutdownGracePeriod: 90s
+  shutdownGracePeriodCriticalPods: 60s
+defaultRuntimeSeccompProfileEnabled: true
+image: ghcr.io/siderolabs/kubelet:v1.37.1
 ---
 # Cluster-local and never routed: pods leave through masquerade and clusters
 # reach each other only through LoadBalancer addresses, so every cluster can use
