@@ -6,7 +6,6 @@ resources:
   - ./external-secrets
   - ./flux-system
   - ./kube-system
-  - ./monitoring
   - ./network
   - ./o11y
   - ./openebs-system

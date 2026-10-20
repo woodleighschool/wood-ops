@@ -6,10 +6,13 @@ metadata:
   name: prtgmpprobe
 spec:
   interval: 1h
-  path: ./kubernetes/apps/base/monitoring/prtgmpprobe/app
+  path: ./kubernetes/apps/base/o11y/prtgmpprobe/app
+  postBuild:
+    substitute:
+      PROBE_ID: df4d6409-356b-4045-ba63-88e31a07114e
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: monitoring
+  targetNamespace: o11y
