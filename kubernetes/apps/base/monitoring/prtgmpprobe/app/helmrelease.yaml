@@ -21,11 +21,8 @@ spec:
               tag: v3.11.0@sha256:ec575061909ccbd2281b8f624a0f1cdbbbc095442eda76739f3f960655b5af09
             env:
               TZ: Australia/Melbourne
-              PRTGMPPROBE__ID: "{{ .PROBE_ID }}"
-              PRTGMPPROBE__NAME: "{{ .PROBE_NAME }}"
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
+              PRTGMPPROBE__ID: "${PROBE_ID}"
+              PRTGMPPROBE__NAME: "${PROBE_NAME}"
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
