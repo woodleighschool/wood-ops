@@ -42,6 +42,12 @@ spec:
         runAsUser: 0
         runAsGroup: 0
     persistence:
+      config:
+        type: configMap
+        identifier: prtgmpprobe-cfg
+        globalMounts:
+          - path: /opt/prtg/config.yaml
+            subPath: config.yaml
       sunca:
         type: configMap
         name: sunca
