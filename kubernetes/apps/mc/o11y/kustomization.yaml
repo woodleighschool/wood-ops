@@ -8,3 +8,4 @@ components:
 resources:
   - ./kube-prometheus-stack.yaml
   - ./namespace.yaml
+  - ./victoria-logs.yaml

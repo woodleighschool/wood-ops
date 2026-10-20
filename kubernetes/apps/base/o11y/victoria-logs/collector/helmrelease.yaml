@@ -17,10 +17,12 @@ spec:
     podMonitor:
       enabled: true
     remoteWrite:
-      - url: http://victoria-logs.o11y.svc.cluster.local:9428
+      - url: ${VICTORIA_LOGS_URL}
         maxDiskUsagePerURL: 10GB
     collector:
+      extraFields: '{"cluster":"${CLUSTER}"}'
       streamFields:
+        - cluster
         - kubernetes.pod_name
         - kubernetes.pod_namespace
         - kubernetes.container_name
