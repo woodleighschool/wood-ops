@@ -8,6 +8,7 @@ spec:
   dependsOn:
     - name: kube-prometheus-stack
       namespace: o11y
+    - name: thanos
   interval: 1h
   path: ./kubernetes/apps/base/monitoring/prometheus/app
   prune: true

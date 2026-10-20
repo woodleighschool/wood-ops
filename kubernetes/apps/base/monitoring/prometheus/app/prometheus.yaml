@@ -58,4 +58,4 @@ spec:
   thanos:
     objectStorageConfig:
       key: objstore.yml
-      name: prometheus-object-storage-secret
+      name: thanos-secret
