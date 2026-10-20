@@ -23,3 +23,26 @@ spec:
     - action: replace
       targetLabel: job
       replacement: assetcache
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/scrapeconfig_v1alpha1.json
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: remote-prometheus
+spec:
+  staticConfigs:
+    - targets:
+        - 10.20.69.90:9090
+      labels:
+        cluster: pc
+    - targets:
+        - 10.30.69.90:9090
+      labels:
+        cluster: mc
+  relabelings:
+    - action: replace
+      targetLabel: job
+      replacement: kube-prometheus-stack-prometheus
+    - action: replace
+      targetLabel: namespace
+      replacement: o11y

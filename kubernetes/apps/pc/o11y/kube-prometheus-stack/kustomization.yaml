@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - patch: |-
+      apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      metadata:
+        name: kube-prometheus-stack
+      spec:
+        values:
+          prometheus:
+            service:
+              type: LoadBalancer
+              annotations:
+                lbipam.cilium.io/ips: 10.20.69.90
+              loadBalancerSourceRanges:
+                - 10.10.69.0/24
+            prometheusSpec:
+              additionalAlertManagerConfigs:
+                - scheme: https
+                  static_configs:
+                    - targets:
+                        - alertmanager.woodleighschool.net

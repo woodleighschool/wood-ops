@@ -31,3 +31,33 @@ spec:
     jsonData:
       implementation: prometheus
     url: http://alertmanager-operated.o11y.svc.cluster.local:9093
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/grafana.integreatly.org/grafanadatasource_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: prometheus-pc
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  datasource:
+    type: prometheus
+    name: prometheus-pc
+    access: proxy
+    url: http://10.20.69.90:9090
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/grafana.integreatly.org/grafanadatasource_v1beta1.json
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: prometheus-mc
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  datasource:
+    type: prometheus
+    name: prometheus-mc
+    access: proxy
+    url: http://10.30.69.90:9090
