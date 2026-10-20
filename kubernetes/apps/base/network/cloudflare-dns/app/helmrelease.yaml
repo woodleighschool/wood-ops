@@ -33,7 +33,6 @@ spec:
       # DNSEndpoints labelled internal are for BIND only
       - --label-filter=dns.woodleighschool.net/scope!=internal
       - --zone-id-filter=$(CF_ZONE_ID)
-      - --migrate-from-txt-owner=default
     triggerLoopOnEvent: true
     policy: sync
     sources:
