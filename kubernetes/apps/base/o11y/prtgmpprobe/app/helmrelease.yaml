@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: docker.io/paessler/multi-platform-probe
-              tag: v3.10.0@sha256:78ffc8d67593de749817ff6fb16b6236e4844ea5694e37c08cc15aacac9800e2
+              tag: v3.11.0@sha256:ec575061909ccbd2281b8f624a0f1cdbbbc095442eda76739f3f960655b5af09
             command: ["/opt/paessler/mpprobe/prtgmpprobe"]
             env:
               TZ: Australia/Melbourne
