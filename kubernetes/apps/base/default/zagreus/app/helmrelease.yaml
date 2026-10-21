@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: ghcr.io/woodleighschool/zagreus
-              tag: 0.1.4@sha256:ec148b5cc96ab01fdc1c54e90debf0a04cfea5445890cd19e91086f9c4c7cfb2
+              tag: 0.1.4@sha256:3a5bccf48d45c3a9becb997cf2f202798b59c0d9b28cc95fee9e442a767c2265
             args:
               - run
               - --config=/etc/zagreus/config.yaml
