@@ -10,18 +10,6 @@ spec:
   groups:
     - name: epson-exporter.rules
       rules:
-        - alert: EpsonPrinterScrapeFailed
-          expr: |-
-            epson_scrape_success == 0
-          for: 10m
-          annotations:
-            summary: >-
-              Epson printer {{ $labels.instance }} scrape is failing
-            description: >-
-              Prometheus has not been able to scrape {{ $labels.instance }} via epson-exporter for 10 minutes.
-          labels:
-            severity: warning
-
         - alert: EpsonInkEmpty
           expr: |-
             epson_consumable_level_percent{type="ink"} == 0
