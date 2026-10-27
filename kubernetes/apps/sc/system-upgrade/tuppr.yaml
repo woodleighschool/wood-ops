@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: tuppr
 spec:
+  components:
+    - ../../../../sc/system-upgrade/tuppr
   interval: 1h
   path: ./kubernetes/apps/base/system-upgrade/tuppr/app
   prune: true

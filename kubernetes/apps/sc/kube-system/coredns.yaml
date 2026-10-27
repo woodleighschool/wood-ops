@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: coredns
 spec:
+  components:
+    - ../../../../sc/kube-system/coredns
   interval: 1h
   path: ./kubernetes/apps/base/kube-system/coredns/app
   prune: true

@@ -32,6 +32,3 @@ spec:
         cpu: 100m
       limits:
         memory: 2Gi
-    webhook:
-      # A single webhook replica on a draining node blocks every kopiur CR write
-      replicaCount: 2

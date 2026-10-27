@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: snapshot-controller
 spec:
+  components:
+    - ../../../../sc/kube-system/snapshot-controller
   interval: 1h
   path: ./kubernetes/apps/base/kube-system/snapshot-controller/app
   prune: true

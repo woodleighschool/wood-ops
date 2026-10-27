@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: kopiur
 spec:
+  components:
+    - ../../../../sc/kopiur-system/kopiur
   dependsOn:
     - name: snapshot-controller
       namespace: kube-system

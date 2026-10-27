@@ -28,6 +28,8 @@ kind: Kustomization
 metadata:
   name: bind
 spec:
+  components:
+    - ../../../../sc/network/bind
   interval: 1h
   path: ./kubernetes/apps/base/network/bind/resolver
   postBuild:

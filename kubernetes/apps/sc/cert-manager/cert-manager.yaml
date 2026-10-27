@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: cert-manager
 spec:
+  components:
+    - ../../../../sc/cert-manager/cert-manager
   healthCheckExprs:
     - apiVersion: cert-manager.io/v1
       current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')

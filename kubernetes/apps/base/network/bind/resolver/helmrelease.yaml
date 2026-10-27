@@ -13,7 +13,6 @@ spec:
     controllers:
       bind:
         type: statefulset
-        replicas: 2
         annotations:
           reloader.stakater.com/auto: "true"
         statefulset:
