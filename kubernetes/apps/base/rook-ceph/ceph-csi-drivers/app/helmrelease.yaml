@@ -12,7 +12,6 @@ spec:
   values:
     drivers:
       cephfs:
-        enabled: true
         kernelMountOptions:
           ms_mode: prefer-crc
         name: rook-ceph.cephfs.csi.ceph.com
@@ -21,6 +20,5 @@ spec:
       nvmeof:
         enabled: false
       rbd:
-        enabled: true
         name: rook-ceph.rbd.csi.ceph.com
         snapshotPolicy: volumeSnapshot

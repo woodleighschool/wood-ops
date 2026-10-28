@@ -14,7 +14,6 @@ spec:
       kea:
         # One server per cluster: nothing locks the lease file, and a second pod
         # behind the same address would hand out the same addresses.
-        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -52,9 +51,7 @@ spec:
                 spec:
                   exec:
                     command: *probe4
-                  periodSeconds: 10
                   timeoutSeconds: 10
-                  failureThreshold: 3
               # Loading a large lease file takes a while.
               startup:
                 enabled: true
@@ -123,9 +120,7 @@ spec:
                 spec:
                   exec:
                     command: *probed
-                  periodSeconds: 10
                   timeoutSeconds: 10
-                  failureThreshold: 3
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

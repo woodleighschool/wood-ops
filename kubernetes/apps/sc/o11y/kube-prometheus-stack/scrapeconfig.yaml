@@ -18,10 +18,8 @@ spec:
         - 10.3.110.9:9200
       labels:
         instance: MC-MACCACHE
-  metricsPath: /metrics
   relabelings:
-    - action: replace
-      targetLabel: job
+    - targetLabel: job
       replacement: assetcache
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/scrapeconfig_v1alpha1.json
@@ -42,9 +40,7 @@ spec:
   # SC's own Prometheus job, so the chart's Prometheus alerts (TargetDown,
   # PrometheusErrorSendingAlertsToAnyAlertmanager, ...) also cover pc and mc
   relabelings:
-    - action: replace
-      targetLabel: job
+    - targetLabel: job
       replacement: kube-prometheus-stack-prometheus
-    - action: replace
-      targetLabel: namespace
+    - targetLabel: namespace
       replacement: o11y

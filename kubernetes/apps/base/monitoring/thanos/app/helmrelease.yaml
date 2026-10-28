@@ -12,7 +12,6 @@ spec:
   values:
     controllers:
       compactor:
-        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -60,8 +59,6 @@ spec:
     persistence:
       data:
         type: emptyDir
-        globalMounts:
-          - path: /data
       objstore:
         type: secret
         name: thanos-secret

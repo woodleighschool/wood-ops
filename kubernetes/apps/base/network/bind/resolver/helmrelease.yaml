@@ -49,7 +49,6 @@ spec:
                     command: &rndc ["rndc", "-k", "/run/named/rndc.key", "status"]
                   periodSeconds: 30
                   timeoutSeconds: 5
-                  failureThreshold: 3
               # Ready once named answers, with or without the internal zones: a
               # resolver that cannot reach the primary still resolves the
               # internet. Readiness also decides whether BGP advertises the
@@ -69,9 +68,7 @@ spec:
                         "woodleighschool.net",
                         "SOA",
                       ]
-                  periodSeconds: 10
                   timeoutSeconds: 5
-                  failureThreshold: 3
               startup:
                 enabled: true
                 custom: true
@@ -140,7 +137,6 @@ spec:
         ports:
           dns-tcp:
             port: 53
-            protocol: TCP
           dns-udp:
             port: 53
             protocol: UDP

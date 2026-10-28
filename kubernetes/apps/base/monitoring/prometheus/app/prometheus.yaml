@@ -20,7 +20,6 @@ spec:
   probeSelector:
     matchLabels:
       monitoring.woodleighschool.net/scrape: "true"
-  replicas: 1
   retentionSize: 8GB
   ruleNamespaceSelector:
     matchLabels:

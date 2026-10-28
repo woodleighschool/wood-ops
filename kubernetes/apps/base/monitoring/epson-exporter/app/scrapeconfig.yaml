@@ -73,6 +73,5 @@ spec:
       targetLabel: instance
     - targetLabel: __address__
       replacement: epson-exporter.monitoring.svc.cluster.local:9788
-    - action: replace
-      targetLabel: job
+    - targetLabel: job
       replacement: epson

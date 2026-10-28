@@ -27,4 +27,3 @@ spec:
     - error.*lookup.*github
     - dial.*tcp.*timeout
     - waiting.*socket
-  suspend: false

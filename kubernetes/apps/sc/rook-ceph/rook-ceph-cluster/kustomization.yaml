@@ -15,4 +15,3 @@ patches:
             storage:
               devicePathFilter: /dev/disk/by-id/ata-MZ7KM960HMJP0D3_.*
               useAllDevices: false
-              useAllNodes: true

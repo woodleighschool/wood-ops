@@ -19,8 +19,6 @@ spec:
               cpu: 100m
             limits:
               memory: 2Gi
-      envoyService:
-        externalTrafficPolicy: Local
   shutdown:
     drainTimeout: 180s
   telemetry:
@@ -56,13 +54,11 @@ spec:
     - type: Gzip
       gzip: {}
   retry:
-    numRetries: 2
     retryOn:
       triggers:
         - reset-before-request
   targetSelectors:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
+    - kind: Gateway
   tcpKeepalive:
     idleTime: 60s
     interval: 10s
@@ -87,8 +83,7 @@ spec:
     onInvalidMessage: TerminateStream
   http3: {}
   targetSelectors:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
+    - kind: Gateway
   tcpKeepalive:
     idleTime: 60s
     interval: 10s
@@ -96,8 +91,3 @@ spec:
   timeout:
     http:
       idleTimeout: 600s
-  tls:
-    minVersion: "1.2"
-    alpnProtocols:
-      - h2
-      - http/1.1

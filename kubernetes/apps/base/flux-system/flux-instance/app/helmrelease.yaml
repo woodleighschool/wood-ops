@@ -15,13 +15,7 @@ spec:
         artifact: oci://ghcr.io/controlplaneio-fluxcd/flux-operator-manifests:v0.62.1
       cluster:
         networkPolicy: false
-      components:
-        - source-controller
-        - kustomize-controller
-        - helm-controller
-        - notification-controller
       sync:
-        kind: GitRepository
         url: https://github.com/woodleighschool/wood-ops
         ref: refs/heads/main
         path: kubernetes/clusters/${CLUSTER}
