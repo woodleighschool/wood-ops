@@ -6,12 +6,6 @@
     "github>home-operations/renovate-presets//apps/talosFactory.json5#10.0.1",
     ":timezone(Australia/Melbourne)",
   ],
-  lockFileMaintenance: {
-    enabled: true,
-    schedule: ["before 6am on the first day of the month"],
-    commitMessageExtra: "({{manager}})",
-    additionalBranchPrefix: "{{manager}}-",
-  },
   hostRules: [
     {
       description: "Authenticate against the GitHub Container registry",
@@ -107,26 +101,6 @@
       minimumGroupSize: 5,
     },
     {
-      // Scheduled tools stay out: a grouped branch takes its schedule from
-      // whichever update sorts first
-      description: "Mise Tools Group",
-      matchManagers: ["mise"],
-      matchDepNames: ["!node", "!oxfmt"],
-      groupName: "mise tools",
-      groupSlug: "mise-tools",
-    },
-    {
-      // After the mise tools catch-all so the kubectl plugin joins the chart;
-      // kopiur wants the plugin and operator on the same release
-      description: "Kopiur Group",
-      groupName: "kopiur",
-      matchPackageNames: ["/home-operations/kopiur/", "/home-operations/charts/kopiur/"],
-      group: {
-        commitMessageTopic: "{{{groupName}}} group",
-      },
-      minimumGroupSize: 2,
-    },
-    {
       description: "Kea Group",
       groupName: "kea",
       matchDatasources: ["docker"],
@@ -147,8 +121,7 @@
       minimumGroupSize: 2,
     },
     {
-      // After the mise tools catch-all so talos wins its own group; unites the
-      // mise pin, the factory installer image, and the tuppr upgrade version
+      // Unites the factory installer image and the tuppr upgrade version
       description: "Talos Group",
       groupName: "talos",
       matchPackageNames: ["siderolabs/talos"],
@@ -157,25 +130,12 @@
       },
       minimumGroupSize: 2,
     },
-    {
-      description: "1Password CLI is not resolvable on GitHub, bump manually",
-      matchManagers: ["mise"],
-      matchDepNames: ["1password-cli"],
-      enabled: false,
-    },
     // Version rules
     {
       description: "ISC: odd minor versions of BIND and Kea are development releases",
       matchDatasources: ["docker"],
       matchPackageNames: ["/internetsystemsconsortium/bind9/", "/isc/docker/kea-/"],
       allowedVersions: "/^\\d+\\.\\d*[02468](\\.\\d+)?$/",
-    },
-    // Scheduling rules
-    {
-      description: "High-cadence mise tools monthly",
-      matchManagers: ["mise"],
-      matchDepNames: ["node", "oxfmt"],
-      schedule: ["before 6am on the first day of the month"],
     },
     // Labeling rules
     {

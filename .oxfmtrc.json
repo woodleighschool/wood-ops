@@ -1,4 +1,4 @@
 {
-  "ignorePatterns": ["CHANGELOG.md", ".release-please-manifest.json", ".mise/locks/"],
+  "ignorePatterns": ["CHANGELOG.md", ".release-please-manifest.json"],
   "printWidth": 100
 }
