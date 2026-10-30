@@ -19,7 +19,7 @@ permissions:
 
 env:
   # renovate: datasource=github-releases depName=jdx/jactionlint
-  JACTIONLINT_VERSION: v2.3.0
+  JACTIONLINT_VERSION: v2.4.0
 
 jobs:
   workflow-lint:
