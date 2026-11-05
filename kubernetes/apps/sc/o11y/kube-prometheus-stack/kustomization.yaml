@@ -5,6 +5,7 @@ kind: Component
 resources:
   - ./alertmanagerconfig.yaml
   - ./grafanadashboard.yaml
+  - ./prometheusrule.yaml
   - ./scrapeconfig.yaml
 patches:
   - patch: |-

@@ -1,0 +1,88 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: assetcache
+spec:
+  groups:
+    - name: assetcache.rules
+      rules:
+        - alert: AssetCacheInactive
+          annotations:
+            description: Content Caching is inactive on {{ $labels.instance }}.
+            summary: Content Caching is inactive.
+          expr: |-
+            (assetcache_active{job="assetcache"} == 0)
+            and on (job, instance) (up{job="assetcache"} == 1)
+          for: 5m
+          labels:
+            severity: warning
+
+        - alert: AssetCacheTCPConnectionFailed
+          annotations:
+            description: The local TCP connection check failed for {{ $labels.instance }}.
+            summary: Content cache TCP connection failed.
+          expr: |-
+            (assetcache_tcp_connect_success{job="assetcache"} == 0)
+            and on (job, instance) (assetcache_active{job="assetcache"} == 1)
+            and on (job, instance) (up{job="assetcache"} == 1)
+          for: 3m
+          labels:
+            severity: warning
+
+        - alert: AssetCacheStatusCollectionFailed
+          annotations:
+            description: Status collection failed for {{ $labels.instance }}.
+            summary: Content cache status collection failed.
+          expr: |-
+            (assetcache_status_up{job="assetcache"} == 0)
+            and on (job, instance) (up{job="assetcache"} == 1)
+          for: 10m
+          labels:
+            severity: warning
+
+        - alert: AssetCacheMetricsCollectionFailed
+          annotations:
+            description: Traffic metrics collection failed for {{ $labels.instance }}.
+            summary: Content cache traffic metrics collection failed.
+          expr: |-
+            (assetcache_metrics_db_up{job="assetcache"} == 0)
+            and on (job, instance) (up{job="assetcache"} == 1)
+          for: 15m
+          labels:
+            severity: warning
+
+        - alert: AssetCacheStoragePressure
+          annotations:
+            description: Cache pressure on {{ $labels.instance }} is at or above 80%.
+            summary: High content cache pressure.
+          expr: |-
+            (assetcache_interval_cache_pressure_ratio{job="assetcache"} >= 0.8)
+            and on (job, instance) (
+              time() - assetcache_metrics_last_timestamp_seconds{job="assetcache"}
+              < 2 * assetcache_metrics_interval_seconds{job="assetcache"}
+            )
+            and on (job, instance) (assetcache_metrics_db_up{job="assetcache"} == 1)
+            and on (job, instance) (assetcache_active{job="assetcache"} == 1)
+            and on (job, instance) (up{job="assetcache"} == 1)
+          for: 15m
+          labels:
+            severity: warning
+
+        - alert: AssetCacheRequestsRejected
+          annotations:
+            description: "{{ $labels.instance }} rejected requests for lack of cache space."
+            summary: Content cache requests rejected.
+          expr: |-
+            (assetcache_interval_requests_rejected_no_space{job="assetcache"} > 0)
+            and on (job, instance) (
+              time() - assetcache_metrics_last_timestamp_seconds{job="assetcache"}
+              < 2 * assetcache_metrics_interval_seconds{job="assetcache"}
+            )
+            and on (job, instance) (assetcache_metrics_db_up{job="assetcache"} == 1)
+            and on (job, instance) (assetcache_active{job="assetcache"} == 1)
+            and on (job, instance) (up{job="assetcache"} == 1)
+          keep_firing_for: 5m
+          labels:
+            severity: warning
