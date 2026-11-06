@@ -94,6 +94,7 @@
         commitMessageTopic: "{{{groupName}}} group",
       },
       minimumGroupSize: 5,
+      separateMinorPatch: true,
     },
     {
       description: "Kea Group",
