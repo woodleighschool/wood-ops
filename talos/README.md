@@ -16,11 +16,11 @@ Templates use `op inject` for secrets, from the cluster's own vault. Talos merge
 CA certificates and keys as a pair, so role patches include both fields.
 
 ```sh
-just talos render-config <cluster> <node>
-just talos apply-node <cluster> <node> --dry-run
-just talos apply-node <cluster> <node>
-just talos upgrade-node <cluster> <node>
-just talos upgrade-k8s <cluster> <version>
+mise run //talos:render-config <node>
+mise run //talos:apply-node <node> --dry-run
+mise run //talos:apply-node <node>
+mise run //talos:upgrade-node <node>
+mise run //talos:upgrade-k8s <version>
 ```
 
 Upgrade Talos before applying configuration that requires the new release.

@@ -9,9 +9,10 @@ Each cluster runs its own Flux, pointed at `kubernetes/clusters/<cluster>`.
 - `kubernetes/apps/base`: the apps.
 - `talos`: shared machine config, and each cluster's own under `talos/<cluster>`.
 
-Recipes take the cluster first (`just talos apply-node sc k8s-1`,
-`just kube sync sc ks`); kubeconfig and talosconfig contexts are named after the
-cluster. A new cluster copies `kubernetes/clusters/sc`, a trimmed
+Tasks act on the current kube context (`kubectl config use-context sc`, then
+`mise run //talos:apply-node k8s-1`), or on `CLUSTER` for a cluster without a
+context yet; bootstrap takes the cluster as an argument. Kubeconfig and
+talosconfig contexts are named after the cluster. A new cluster copies `kubernetes/clusters/sc`, a trimmed
 `kubernetes/apps/sc` and `talos/sc`, with its own 1Password vault, age key and
 backup bucket.
 

@@ -1,0 +1,125 @@
+[tasks.apply-ks]
+description = "Apply local Flux Kustomization"
+usage = '''
+arg "<ns>" help="Namespace of the Flux Kustomization"
+arg "<ks>" help="Name of the Flux Kustomization"
+'''
+run = '''
+cluster="$(mise run //:cluster)"
+mise run //kubernetes:render-local-ks "$cluster" "$usage_ns" "$usage_ks" | kubectl --context "$cluster" apply --server-side --force-conflicts --field-manager=kustomize-controller -f -
+'''
+
+[tasks.browse-pvc]
+description = "Browse a PVC"
+interactive = true
+usage = '''
+arg "<ns>" help="Namespace of the PVC"
+arg "<claim>" help="Name of the PVC"
+'''
+run = '''
+cluster="$(mise run //:cluster)"
+kubectl --context "$cluster" run -n "$usage_ns" "browse-pvc-$usage_claim" -it --rm --restart=Never \
+    --image=mirror.gcr.io/alpine:latest \
+    --overrides='{"spec":{"containers":[{"name":"browse-pvc-{{ usage.claim }}","image":"mirror.gcr.io/alpine:latest","stdin":true,"tty":true,"command":["/bin/sh"],"workingDir":"/mnt","volumeMounts":[{"mountPath":"/mnt","name":"data"}]}],"volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"{{ usage.claim }}"}}]}}'
+'''
+
+[tasks.debug-node]
+description = "Debug a node"
+extends = "node"
+interactive = true
+usage = 'arg "<node>" help="Name of the node"'
+run = '''
+cluster="$(mise run //:cluster)"
+trap 'kubectl --context "$cluster" delete pod -n default -l app.kubernetes.io/managed-by=kubectl-debug --field-selector "spec.nodeName=$usage_node" --ignore-not-found --wait=false' EXIT
+kubectl --context "$cluster" debug "node/$usage_node" -n default -it --image=mirror.gcr.io/alpine:latest --profile=sysadmin
+'''
+
+[tasks.delete-ks]
+description = "Delete local Flux Kustomization"
+usage = '''
+arg "<ns>" help="Namespace of the Flux Kustomization"
+arg "<ks>" help="Name of the Flux Kustomization"
+'''
+run = '''
+cluster="$(mise run //:cluster)"
+mise run //kubernetes:render-local-ks "$cluster" "$usage_ns" "$usage_ks" | kubectl --context "$cluster" delete -f -
+'''
+
+[tasks.prune-pods]
+description = "Prune pods in Failed, Pending, or Succeeded state"
+run = '''
+cluster="$(mise run //:cluster)"
+for phase in Failed Pending Succeeded; do
+    kubectl --context "$cluster" delete pods -A --field-selector status.phase="$phase" --ignore-not-found=true
+done
+'''
+
+[tasks.restore]
+description = "Restore a PVC from Kopiur"
+usage = '''
+arg "<ns>" help="Namespace of the app"
+arg "<app>" help="App whose PVC to restore"
+arg "[previous]" default="0" help="How many snapshots back to restore"
+'''
+confirm = { message = "Overwrite {{ usage.ns }}/{{ usage.app }} in {{ exec(command='mise run //:cluster') }} from a snapshot?", default = "no" }
+run = '''
+cluster="$(mise run //:cluster)"
+ctx=(--context "$cluster" -n "$usage_ns")
+flux "${ctx[@]}" suspend kustomization "$usage_app"
+flux "${ctx[@]}" suspend helmrelease "$usage_app"
+kubectl "${ctx[@]}" get deploy,sts -l "app.kubernetes.io/name=$usage_app" -o name \
+    | xargs -r -I{} kubectl "${ctx[@]}" scale {} --replicas=0
+kubectl "${ctx[@]}" wait pod --for=delete --selector="app.kubernetes.io/name=$usage_app" --timeout=5m
+kopiur restore --from-policy "$usage_app" --offset "$usage_previous" --to-pvc "$usage_app" \
+    --enable-file-deletion --on-missing-snapshot fail --wait --timeout 2h "${ctx[@]}"
+flux "${ctx[@]}" resume kustomization "$usage_app"
+flux "${ctx[@]}" resume helmrelease "$usage_app"
+flux "${ctx[@]}" reconcile helmrelease "$usage_app" --force
+kubectl "${ctx[@]}" wait pod --for=condition=ready --selector="app.kubernetes.io/name=$usage_app" --timeout=5m
+'''
+
+[tasks.snapshot]
+description = "Snapshot every Kopiur policy now"
+run = '''
+cluster="$(mise run //:cluster)"
+kubectl --context "$cluster" get snapshotpolicies --no-headers -A | while read -r ns name _; do
+    kopiur snapshot now --policy "$name" --context "$cluster" -n "$ns"
+done
+'''
+
+[tasks.sync]
+description = "Sync a resource"
+usage = '''
+arg "<resource>" help="Kind of resource to sync" {
+  choices "hr" "ks" "gitrepo" "ocirepo" "es"
+}
+'''
+run = '''
+cluster="$(mise run //:cluster)"
+kubectl --context "$cluster" get "$usage_resource" --no-headers -A | while read -r ns name _; do
+    kubectl --context "$cluster" -n "$ns" annotate --field-manager flux-client-side-apply --overwrite "$usage_resource" "$name" \
+        "force-sync=$(date +%s)" \
+        "reconcile.fluxcd.io/requestedAt=$(date +%s)" \
+        "reconcile.fluxcd.io/forceAt=$(date +%s)"
+done
+'''
+
+[tasks.view-secret]
+description = "View a secret"
+usage = '''
+arg "<ns>" help="Namespace of the secret"
+arg "<secret>" help="Name of the secret"
+'''
+run = '''
+cluster="$(mise run //:cluster)"
+kubectl --context "$cluster" view-secret -n "$usage_ns" "$usage_secret"
+'''
+
+[tasks.render-local-ks]
+hide = true
+usage = '''
+arg "<cluster>"
+arg "<ns>"
+arg "<ks>"
+'''
+run = 'flate build ks --path "clusters/$usage_cluster" --namespace "$usage_ns" --output yaml "$usage_ks"'

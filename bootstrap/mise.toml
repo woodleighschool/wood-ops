@@ -1,0 +1,176 @@
+# Bootstrap takes the cluster as an argument: its kube context only exists once
+# the kubeconfig stage has run.
+[tasks.cluster]
+description = "Bootstrap a Talos & Kubernetes cluster end-to-end"
+usage = 'arg "<cluster>" help="Cluster to bootstrap"'
+confirm = { message = "Bootstrap cluster {{ usage.cluster }}?", default = "no" }
+run = '''
+CLUSTER="$usage_cluster" mise run //:cluster >/dev/null
+mise run //bootstrap:render "$usage_cluster"
+mise run //bootstrap:nodes "$usage_cluster"
+mise run //bootstrap:k8s "$usage_cluster"
+mise run //bootstrap:kubeconfig "$usage_cluster" node
+mise run //bootstrap:base "$usage_cluster"
+mise run //bootstrap:apps "$usage_cluster"
+mise run //bootstrap:kubeconfig "$usage_cluster"
+'''
+
+# Render the cluster's Flux tree once. Every HelmRelease gets a directory with
+# its chart (release.yaml), its values (values.yaml) and the other objects of
+# the Flux Kustomization that renders it (manifests.yaml).
+[tasks.render]
+description = "Render what Flux will reconcile, for helmfile to install"
+usage = 'arg "<cluster>" help="Cluster to render"'
+run = '''
+CLUSTER="$usage_cluster" mise run //:cluster >/dev/null
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+dir="$MISE_MONOREPO_ROOT/.private/bootstrap/$usage_cluster"
+rm -rf "$dir" && mkdir -p "$dir"
+flate build ks --path "$MISE_MONOREPO_ROOT/kubernetes/clusters/$usage_cluster" --no-progress > "$dir/rendered.yaml"
+yq -N 'select(.kind == "HelmRelease") | .metadata.namespace + "/" + .metadata.name' "$dir/rendered.yaml" | while read -r id; do
+    export NS="${id%/*}" NAME="${id#*/}"
+    mkdir -p "$dir/$id"
+    hr='select(.kind == "HelmRelease" and .metadata.namespace == env(NS) and .metadata.name == env(NAME))'
+    CHART="$(yq -N "${hr} | .spec.chartRef.name" "$dir/rendered.yaml")"
+    KS="$(yq -N "${hr} | .metadata.labels.\"kustomize.toolkit.fluxcd.io/name\"" "$dir/rendered.yaml")"
+    export CHART KS
+    yq -N "${hr} | .spec.values // {}" "$dir/rendered.yaml" > "$dir/$id/values.yaml"
+    yq -N 'select(.kind == "OCIRepository" and .metadata.namespace == env(NS) and .metadata.name == env(CHART)) | {"chart": .spec.url, "version": .spec.ref.tag}' \
+        "$dir/rendered.yaml" > "$dir/$id/release.yaml"
+    yq 'select(.metadata.labels."kustomize.toolkit.fluxcd.io/name" == env(KS) and .metadata.labels."kustomize.toolkit.fluxcd.io/namespace" == env(NS))' \
+        "$dir/rendered.yaml" > "$dir/$id/manifests.yaml"
+done
+'''
+
+[tasks.nodes]
+hide = true
+usage = 'arg "<cluster>"'
+run = '''
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+for n in $(mise run //talos:nodes "$usage_cluster"); do
+    if ! op=$(CLUSTER="$usage_cluster" mise --yes run //talos:apply-node "$n" --insecure 2>&1); then
+        if [[ "$op" == *"certificate required"* ]]; then
+            mise run //:log info "Talos already configured, skipping apply of config" stage "$MISE_TASK_NAME" node "$n"
+            continue
+        fi
+        mise run //:log fatal "Failed to apply Talos configuration" stage "$MISE_TASK_NAME" node "$n" output "$op"
+    fi
+done
+'''
+
+[tasks.k8s]
+hide = true
+usage = 'arg "<cluster>"'
+run = '''
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+controller="$(mise run //bootstrap:controller "$usage_cluster")"
+until op=$(talosctl --context "$usage_cluster" -e "$controller" -n "$controller" bootstrap 2>&1 || true) && [[ "$op" == *"AlreadyExists"* ]]; do
+    mise run //:log info "Kubernetes bootstrap in progress. Retrying in 5 seconds..." stage "$MISE_TASK_NAME"
+    sleep 5
+done
+'''
+
+# The kubeconfig context is named after the cluster. Until Cilium serves the API
+# LoadBalancer address, talk to the first controller directly.
+[tasks.kubeconfig]
+hide = true
+usage = '''
+arg "<cluster>"
+arg "[lb]" default="cilium"
+'''
+run = '''
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+controller="$(mise run //bootstrap:controller "$usage_cluster")"
+if ! talosctl --context "$usage_cluster" -e "$controller" kubeconfig -n "$controller" -f --force-context-name "$usage_cluster" "$MISE_MONOREPO_ROOT"; then
+    mise run //:log fatal "Failed to fetch kubeconfig" stage "$MISE_TASK_NAME"
+fi
+if [[ "$usage_lb" != "cilium" ]]; then
+    if ! kubectl config set-cluster "$usage_cluster" --server "https://${controller}:6443"; then
+        mise run //:log fatal "Failed to set kubectl cluster server address" stage "$MISE_TASK_NAME"
+    fi
+fi
+'''
+
+# Secrets and admission policy that must exist before Flux runs. The 1Password
+# vault is the first one in the cluster's ClusterSecretStore.
+[tasks.base]
+hide = true
+usage = 'arg "<cluster>"'
+run = '''
+mise run //bootstrap:api-ready "$usage_cluster"
+mise run //bootstrap:nodes-ready "$usage_cluster"
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+apps="$MISE_MONOREPO_ROOT/kubernetes/apps/$usage_cluster"
+vault="$(yq -r -e '.spec.provider.onepassword.vaults | to_entries | sort_by(.value) | .[0].key' "$apps/external-secrets/onepassword-connect/clustersecretstore.yaml")"
+dirs=(apps)
+if [[ -f "$apps/network/cloudflare-tunnel.yaml" ]]; then
+    dirs+=(cloudflare-tunnel)
+fi
+for d in "${dirs[@]}"; do kustomize build "kustomize/$d"; done \
+    | mise run //:template - -D "vault=${vault}" \
+    | kubectl --context "$usage_cluster" apply --server-side --force-conflicts -f - \
+    || mise run //:log fatal "Failed to apply base manifests" stage "$MISE_TASK_NAME"
+mise run //bootstrap:crds "$usage_cluster"
+'''
+
+# Also useful on a running cluster, before Flux applies objects of a new CRD.
+[tasks.crds]
+description = "Apply the CRDs of the cluster's CRD-providing charts"
+usage = 'arg "<cluster>" help="Cluster to apply the CRDs to"'
+run = '''
+CLUSTER="$usage_cluster" mise run //:cluster >/dev/null
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+render_dir="$MISE_MONOREPO_ROOT/.private/bootstrap/$usage_cluster"
+if [[ ! -d "$render_dir" ]]; then
+    mise run //bootstrap:render "$usage_cluster"
+fi
+if ! CLUSTER="$usage_cluster" BOOTSTRAP_RENDER_DIR="$render_dir" helmfile -f helmfile/crds.yaml.gotmpl template -q | yq ea -r -e 'select(.kind == "CustomResourceDefinition")' | kubectl --context "$usage_cluster" apply --server-side --force-conflicts -f -; then
+    mise run //:log fatal "Failed to apply base crds" stage "$MISE_TASK_NAME"
+fi
+'''
+
+[tasks.apps]
+hide = true
+usage = 'arg "<cluster>"'
+run = '''
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+if ! CLUSTER="$usage_cluster" BOOTSTRAP_RENDER_DIR="$MISE_MONOREPO_ROOT/.private/bootstrap/$usage_cluster" helmfile -f helmfile/apps.yaml.gotmpl sync --hide-notes; then
+    mise run //:log fatal "Failed to sync helmfile" stage "$MISE_TASK_NAME"
+fi
+'''
+
+# Wait until every apiserver answers /readyz. Helm and kubectl calls after this stage are not retried.
+[tasks.api-ready]
+hide = true
+usage = 'arg "<cluster>"'
+run = '''
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+for n in $(mise run //talos:nodes "$usage_cluster"); do
+    addr="$(mise run //talos:address "$usage_cluster" "$n")"
+    until [[ "$(curl -ks -o /dev/null -w '%{http_code}' --connect-timeout 2 "https://${addr}:6443/readyz")" == "200" ]]; do
+        mise run //:log info "Waiting for kube-apiserver. Retrying in 5 seconds..." stage "$MISE_TASK_NAME" node "$n"
+        sleep 5
+    done
+done
+'''
+
+# Wait until every node registers as Ready=False. They only become Ready=True once the CNI is healthy.
+[tasks.nodes-ready]
+hide = true
+usage = 'arg "<cluster>"'
+run = '''
+mise run //:log info "Running stage..." stage "$MISE_TASK_NAME" cluster "$usage_cluster"
+until kubectl --context "$usage_cluster" wait nodes --for=condition=Ready=True --all --timeout=10s &>/dev/null ||
+    kubectl --context "$usage_cluster" wait nodes --for=condition=Ready=False --all --timeout=10s &>/dev/null; do
+    mise run //:log info "Nodes not available, waiting for nodes to be available. Retrying in 5 seconds..." stage "$MISE_TASK_NAME"
+    sleep 5
+done
+'''
+
+[tasks.controller]
+hide = true
+usage = 'arg "<cluster>"'
+run = '''
+node="$(mise run //talos:nodes "$usage_cluster" | sed -n 1p)"
+mise run //talos:address "$usage_cluster" "$node"
+'''
