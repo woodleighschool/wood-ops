@@ -4,12 +4,12 @@ kind: Backend
 metadata:
   name: woodsweep
 spec:
+  type: KubernetesService
+  kubernetesService:
+    name: woodsweep
+    port: 51515
   appProtocols:
     - gateway.envoyproxy.io/h2c
-  endpoints:
-    - fqdn:
-        hostname: woodsweep.default.svc.cluster.local
-        port: 51515
   tls:
     alpnProtocols:
       - h2
