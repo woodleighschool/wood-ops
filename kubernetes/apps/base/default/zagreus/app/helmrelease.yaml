@@ -55,6 +55,7 @@ spec:
             settings:
               log_level: info
               sync:
+                poll_interval: 24h
               terms:
                 - name: Term 1
                   range: 29/1/26-11/4/26
