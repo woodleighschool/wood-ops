@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/woodleighschool/freshservice-label
-              tag: 0.2.3@sha256:92722a06645d33401fc5423d024f49084cf89a87436676b7b0ce8d9ca6151477
+              tag: 0.2.4@sha256:8e4e8a0d9a3e15d3f880ea6bcca3c95f32ff70cba3897c3c3f44c7079fcd76ff
             env:
               FRESHSERVICE_LABEL_LOGO_URL: https://r2-d2.woodleigh.vic.edu.au/Logo%20Black.png
               FRESHSERVICE_LABEL_PRINTER_ADDR: 172.19.10.13
