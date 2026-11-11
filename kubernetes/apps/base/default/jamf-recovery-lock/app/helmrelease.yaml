@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: ghcr.io/woodleighschool/jamf-recovery-lock
-              tag: 3.1.1@sha256:bc34f0a8419a0416dfc845b456336050c2472233bb23ecc202c0723a986f686b
+              tag: 3.1.2@sha256:02b880a1c389a73f13b9db7b9c59093b6dbcfae7c4d930a734a6de917ec14ab7
             env:
               PASSWORD_LENGTH: 10
               LOG_LEVEL: debug
