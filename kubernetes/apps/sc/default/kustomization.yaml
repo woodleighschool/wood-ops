@@ -15,6 +15,7 @@ resources:
   - ./metabasis.yaml
   - ./namespace.yaml
   - ./onomazo.yaml
+  - ./sigweft.yaml
   - ./signin-ui.yaml
   - ./snipe-it.yaml
   - ./vaultwarden.yaml
