@@ -12,6 +12,8 @@ spec:
   values:
     controllers:
       leave-calendar:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -22,6 +24,7 @@ spec:
               NODE_EXTRA_CA_CERTS: /etc/ssl/certs/ca-certificates.crt
               CALENDAR_SYNC_MAX_AGE_HOURS: 24
               VICTORIA_CALENDAR_URL: "https://www.vic.gov.au/sites/default/files/2026-06/Victorian-public-holiday-dates.ics"
+              APP_BASE_URL: "https://{{ .Release.Name }}.woodleighschool.net"
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
