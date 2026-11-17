@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/woodleighschool/sigweft
-              tag: main@sha256:a575603d644272f8c440a8059cc7521497b045cfc01b2defa81ee24fcb3f9ea7
+              tag: 2.0.0@sha256:9f4b278238f3f2d9e3f249853793ef6072345fa4f40af655a2928d1b278f0b60
             env:
               SIGWEFT_CONFIG: /config/sigweft.yaml
               SIGWEFT_URL: "https://{{ .Release.Name }}.woodleighschool.net"
