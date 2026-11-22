@@ -61,6 +61,9 @@ spec:
                   httpGet:
                     path: /health
                     port: *port
+                    httpHeaders:
+                      - name: Host
+                        value: &host snipe-it.woodleighschool.net
                   timeoutSeconds: 5
                   failureThreshold: 5
               startup:
@@ -80,7 +83,7 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 100
+        runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
@@ -92,7 +95,7 @@ spec:
     route:
       app:
         hostnames:
-          - snipe-it.woodleighschool.net
+          - *host
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -104,5 +107,25 @@ spec:
       tmpfs:
         type: emptyDir
         globalMounts:
+          - path: /run/apache2
+            subPath: run
+          - path: /var/www/html/bootstrap/cache
+            subPath: bootstrap-cache
+          - path: /var/www/html/storage/app/backup-temp
+            subPath: backup-temp
+          - path: /var/www/html/storage/app/restore-temp
+            subPath: restore-temp
+          - path: /var/www/html/storage/fonts
+            subPath: fonts
+          - path: /var/www/html/storage/framework/cache
+            subPath: framework-cache
+          - path: /var/www/html/storage/framework/sessions
+            subPath: framework-sessions
+          - path: /var/www/html/storage/framework/views
+            subPath: framework-views
+          - path: /var/www/html/storage/livewire-tmp
+            subPath: livewire-tmp
+          - path: /var/www/html/storage/logs
+            subPath: logs
           - path: /var/www/logs/
             subPath: www-logs
